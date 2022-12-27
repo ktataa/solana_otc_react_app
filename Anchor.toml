@@ -1,0 +1,14 @@
+[features]
+seeds = false
+[programs.localnet]
+otc_program = "2LG6Wv5UkCWcVx3d8MGXA2v7cbhHnHedYMw74n3gokRV"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "devnet"
+wallet = "/Users/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
