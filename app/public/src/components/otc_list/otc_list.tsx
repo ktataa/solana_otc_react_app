@@ -9,7 +9,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { useConnection } from "@solana/wallet-adapter-react";
 import useOTCProgram from "../../web3/useOtcProgram";
-import { get_all_otc_details, get_decimals, IOTCAccount } from "../../web3/utils";
+import { get_all_otc_details, IOTCAccount } from "../../web3/utils";
 import BuyModal from "../buy_modal/buy_modal";
 
 const useStyles = makeStyles({
@@ -34,7 +34,6 @@ function OtcList() {
         connection
       );
       setOtcData(otc_details);
-      console.log(otc_details);
     })();
   }, [connection]);
 

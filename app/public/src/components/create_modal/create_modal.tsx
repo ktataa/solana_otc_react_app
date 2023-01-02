@@ -8,6 +8,8 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 export const CreateModal = (...props: any) => {
   const { otcProgram, wallet } = useOTCProgram();
@@ -17,6 +19,9 @@ export const CreateModal = (...props: any) => {
   const [baseAmount, setBaseAmount] = useState(0);
   const [quoteAmount, setQuoteAmount] = useState(0);
   const { createOpen, setCreateOpen } = props[0];
+  const [whiteList, setWhiteList] = useState<any>();
+  const [incrementWhiteList, setIncrementWhitelist] = useState(1);
+  const [enableWhiteList, setEnableWhiteList] = useState(false);
 
   const baseQuoteRate: number = useMemo(() => {
     return (baseAmount / quoteAmount) * 1e9;
@@ -29,6 +34,7 @@ export const CreateModal = (...props: any) => {
       baseAmount: Number(baseAmount!)!,
       quoteAmount: Number(quoteAmount!)!,
       baseQuoteRate: Number(baseQuoteRate!)!,
+      whiteList,
       wallet,
       otcProgram,
       connection,
@@ -39,6 +45,27 @@ export const CreateModal = (...props: any) => {
 
   const handleClose = () => {
     setCreateOpen(false);
+  };
+
+  const checkBoxClicked = () => {
+    setWhiteList([]);
+    setIncrementWhitelist(1);
+    setEnableWhiteList((value: Boolean) => !value);
+  };
+
+  const addWhiteList = (index: number, value: String) => {
+    let temp_whiteList = whiteList;
+
+    if (value == "") {
+      temp_whiteList.splice(index, 1);
+    } else {
+      temp_whiteList[index] = new PublicKey(value).toBytes();
+    }
+    setWhiteList(temp_whiteList);
+
+    if (incrementWhiteList == index + 1) {
+      setIncrementWhitelist((prev) => prev + 1);
+    }
   };
 
   return (
@@ -86,6 +113,40 @@ export const CreateModal = (...props: any) => {
             fullWidth
             variant="standard"
           />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={enableWhiteList}
+                onChange={checkBoxClicked}
+                name="whitelist_checkbox"
+              />
+            }
+            label="whitelist"
+          />
+
+          <>
+            {enableWhiteList ? (
+              Array.from(Array(incrementWhiteList).keys()).map(
+                (e: any, index) => {
+                  return (
+                    <TextField
+                      margin="dense"
+                      id="filled-size-small"
+                      label="whitelisted address"
+                      type="text"
+                      fullWidth
+                      variant="standard"
+                      onChange={(e) => addWhiteList(index, e.target.value)}
+                    />
+                  );
+                }
+              )
+            ) : (
+              <></>
+            )}
+            <br />
+          </>
           <Button onClick={create} variant="contained" size="small">
             Create
           </Button>

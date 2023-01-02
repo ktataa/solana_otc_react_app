@@ -94,7 +94,7 @@ export async function get_all_otc_details(
   );
 
   let otc_accounts = all_accounts
-    .map((a) => (a.account.data.length === 232 ? a : null))
+    .map((a) => (a.account.data.length >= 232 ? a : null))
     .filter(Boolean);
   return Promise.all(
     otc_accounts.map(async (otc_account: any): Promise<IOTCAccount> => {

@@ -15,6 +15,7 @@ export interface ICreate {
   baseQuoteRate: number;
   baseTokenMint: PublicKey;
   quoteTokenMint: PublicKey;
+  whiteList: [Uint8Array];
   wallet?: AnchorWallet;
   otcProgram: Program<OtcProgram>;
   connection: Connection;
@@ -38,9 +39,11 @@ export async function create_otc(args: ICreate): Promise<string> {
 
   return args.otcProgram?.methods
     .createOtc(
+      new anchor.BN(args.whiteList.length * 32 + 4),
       new anchor.BN(Number(args.baseAmount * 10 ** base_decimals)),
       new anchor.BN(Number(args.quoteAmount * 10 ** quote_decimals)),
-      new anchor.BN(Number(args.baseQuoteRate))
+      new anchor.BN(Number(args.baseQuoteRate)),
+      args.whiteList
     )
     .accounts({
       owner: args.wallet?.publicKey,

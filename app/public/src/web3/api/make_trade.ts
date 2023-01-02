@@ -27,7 +27,6 @@ export async function make_trade(
     otc_details.quoteTokenMint,
     args.connection
   );
-  console.log(otc_details);
 
   return await args.otcProgram?.methods
     .makeTrade(new anchor.BN(args.maker_amount * 10 ** quote_decimals))

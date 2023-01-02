@@ -63,6 +63,10 @@ export type OtcProgram ={
       ],
       "args": [
         {
+          "name": "space",
+          "type": "u64"
+        },
+        {
           "name": "baseAmount",
           "type": "u64"
         },
@@ -73,6 +77,17 @@ export type OtcProgram ={
         {
           "name": "baseQuoteRate",
           "type": "u64"
+        },
+        {
+          "name": "whiteList",
+          "type": {
+            "vec": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
         }
       ]
     },
@@ -96,7 +111,7 @@ export type OtcProgram ={
         },
         {
           "name": "quoteTokenAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -198,9 +213,32 @@ export type OtcProgram ={
           {
             "name": "ownerQuoteTokenAccount",
             "type": "publicKey"
+          },
+          {
+            "name": "whiteList",
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
           }
         ]
       }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidAuthorityAccount",
+      "msg": "Invalid Authority Account"
+    },
+    {
+      "code": 6001,
+      "name": "AddressNotFound",
+      "msg": "Maker address not found"
     }
   ],
   "metadata": {
@@ -272,6 +310,10 @@ export type OtcProgram ={
         ],
         "args": [
           {
+            "name": "space",
+            "type": "u64"
+          },
+          {
             "name": "baseAmount",
             "type": "u64"
           },
@@ -282,6 +324,17 @@ export type OtcProgram ={
           {
             "name": "baseQuoteRate",
             "type": "u64"
+          },
+          {
+            "name": "whiteList",
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
           }
         ]
       },
@@ -305,7 +358,7 @@ export type OtcProgram ={
           },
           {
             "name": "quoteTokenAccount",
-            "isMut": false,
+            "isMut": true,
             "isSigner": false
           },
           {
@@ -407,9 +460,32 @@ export type OtcProgram ={
             {
               "name": "ownerQuoteTokenAccount",
               "type": "publicKey"
+            },
+            {
+              "name": "whiteList",
+              "type": {
+                "vec": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
+              }
             }
           ]
         }
+      }
+    ],
+    "errors": [
+      {
+        "code": 6000,
+        "name": "InvalidAuthorityAccount",
+        "msg": "Invalid Authority Account"
+      },
+      {
+        "code": 6001,
+        "name": "AddressNotFound",
+        "msg": "Maker address not found"
       }
     ],
     "metadata": {

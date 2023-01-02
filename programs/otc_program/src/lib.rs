@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*};
-use anchor_spl::{token::{self, CloseAccount, Mint, SetAuthority, TokenAccount, Transfer}, associated_token::AssociatedToken};
+use anchor_spl::{token::{self, Mint, SetAuthority, TokenAccount, Transfer}, associated_token::AssociatedToken};
 use spl_token::instruction::AuthorityType;
 
 
@@ -12,7 +12,7 @@ const OTC_PDA_SEED: &[u8] = b"otc_authority";
 pub mod otc_program {
     use super::*;
 
-    pub fn create_otc(ctx: Context<CreateOTC>,base_amount: u64, quote_amount: u64,base_quote_rate:u64
+    pub fn create_otc(ctx: Context<CreateOTC>,space: u64,base_amount: u64, quote_amount: u64,base_quote_rate:u64,white_list: Vec<[u8;32]>
     ) -> Result<()> {
 
         let otc_account = &mut ctx.accounts.otc_account;
@@ -27,6 +27,7 @@ pub mod otc_program {
          otc_account.owner_quote_token_account = ctx.accounts.quote_token_account.to_account_info().key();
          otc_account.base_quote_rate = base_quote_rate;
          otc_account.sold = 0;
+         otc_account.white_list = white_list;
 
          
          let (otc_authority, _otc_authority_bump) =
@@ -58,11 +59,28 @@ pub mod otc_program {
     Pubkey::find_program_address(&[OTC_PDA_SEED,&ctx.accounts.otc_account.to_account_info().key().to_bytes()[..]], ctx.program_id);
     let authority_seeds = &[&OTC_PDA_SEED[..],&ctx.accounts.otc_account.to_account_info().key().to_bytes()[..],&[_otc_authority_bump]];
 
+    let mut found = false;
+
+    if otc_account.white_list.to_owned().len() == 0 {
+        found = true
+    }
+    
+    for address in otc_account.white_list.to_owned()  {
+        if Pubkey::new_from_array(address) == *ctx.accounts.owner.to_account_info().key  {
+            found = true;   
+        }     
+    } 
+
+
+
+
+    if !found {
+        return Err(error!(ErrorCode::AddressNotFound));
+    }
+
 
     if otc_authority != *ctx.accounts.otc_authority_account.to_account_info().key {
         return Err(error!(ErrorCode::InvalidAuthorityAccount));
-
-
     } 
     token::transfer(
         ctx.accounts.into_transfer_quote_to_owner(),
@@ -73,12 +91,6 @@ pub mod otc_program {
         base_transfer_amount as u64).unwrap();
 
     ctx.accounts.otc_account.sold += base_transfer_amount as u64;
-
-        
-
-
-
-
     Ok(())
  }   
 
@@ -86,6 +98,9 @@ pub mod otc_program {
 }
 
 #[derive(Accounts)]
+#[instruction(
+    space:usize
+)]
 
 pub struct CreateOTC<'info> {
 
@@ -95,7 +110,7 @@ pub struct CreateOTC<'info> {
     #[account(
         init,
         payer = owner,        
-        space = 232,
+        space = 232 + space,
     )]
     pub otc_account: Box<Account<'info,OtcAccount>>,
 
@@ -159,7 +174,8 @@ pub struct OtcAccount{
     pub otc_base_token_account: Pubkey,
 
     pub owner_quote_token_account: Pubkey,
-
+    
+    pub white_list: Vec<[u8;32]>
 
 
 }
@@ -176,10 +192,16 @@ pub struct MakeTrade <'info> {
     )]
     pub otc_account: Box<Account<'info,OtcAccount>>,
 
+    
+
     pub quote_token_mint : Box<Account<'info,Mint>>,
 
     #[account(
-        token::mint = quote_token_mint
+        init_if_needed,
+        payer = owner,
+        associated_token::mint = quote_token_mint, 
+        associated_token::authority = owner,
+
     )]
     pub quote_token_account : Box<Account<'info,TokenAccount>>,
 
@@ -203,7 +225,7 @@ pub struct MakeTrade <'info> {
         init_if_needed,
         payer = owner,
         associated_token::mint = base_token_mint, 
-        associated_token::authority = owner
+        associated_token::authority = owner,        
     )]
     pub owner_base_token_account: Box<Account<'info,TokenAccount>>,
 
@@ -270,4 +292,6 @@ impl<'info>CreateOTC<'info> {
 pub enum ErrorCode {
     #[msg("Invalid Authority Account")]
     InvalidAuthorityAccount,
+    #[msg("Maker address not found")]
+    AddressNotFound,
 }

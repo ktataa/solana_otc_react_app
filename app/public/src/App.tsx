@@ -1,15 +1,9 @@
 import React, { useMemo } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import MainScreen from './screens/main_screen/main_screen';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { UnsafeBurnerWalletAdapter,PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import {
-    WalletModalProvider,
-    WalletDisconnectButton,
-    WalletMultiButton
-} from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 
 function App() {
